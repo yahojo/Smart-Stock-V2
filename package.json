@@ -1,7 +1,7 @@
 {
   "name": "smart-stock-selector-v2",
   "version": "2.0.0",
-  "homepage": "https://yahojo.github.io/smart-stock-v2",
+  "homepage": "https://yahojo.github.io/Smart-Stock-V2",
   "description": "Smart Stock Selector V2",
   "main": "src/index.js",
   "dependencies": {
