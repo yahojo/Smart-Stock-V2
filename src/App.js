@@ -8,12 +8,11 @@ import {
   AlertTriangle,
   CheckCircle2,
   Clock,
-  DollarSign,
   Loader2,
 } from "lucide-react";
 
 // --- 備用數據 (FALLBACK) ---
-// 當抓不到雲端 data.json 時 (例如 Python 還沒跑)，會顯示這組資料，確保網頁不會壞掉
+// 當抓不到雲端 data.json 時 (例如 Python 還沒跑)，會顯示這組資料
 const FALLBACK_STOCKS = [
   {
     id: "0000",
@@ -55,7 +54,7 @@ const FALLBACK_STOCKS = [
   },
 ];
 
-// --- 策略定義 (維持原本邏輯) ---
+// --- 策略定義 ---
 const STRATEGIES = [
   {
     id: "original_golden_cross",
@@ -92,7 +91,6 @@ const STRATEGIES = [
     description: "捕捉新一波漲勢起點，需符合長線多頭、強勢區間、爆量長紅。",
     requirements: ["股價 > 年線", "接近52週高點", "漲幅 > 3%", "量增 1.5倍"],
     filter: (stock) => {
-      // 加上 || 0 是為了防止資料缺漏時導致當機
       const ma200 = stock.ma200 || 0;
       const high52w = stock.high52w || 99999;
       const avgVol = stock.avgVolume20 || 99999999;
@@ -215,36 +213,42 @@ export default function App() {
   const [activeStrategy, setActiveStrategy] = useState(STRATEGIES[0].id);
   const [stocks, setStocks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [dataSource, setDataSource] = useState("loading"); // 狀態: 'cloud' (雲端) 或 'fallback' (備用)
+  const [dataSource, setDataSource] = useState("loading");
 
-  // --- 關鍵修改：嘗試讀取外部 JSON ---
-  // 這段程式碼會去尋找網站根目錄下的 'data.json' 檔案
+  // --- 改良後的數據抓取邏輯 ---
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // 1. 嘗試讀取 data.json (由 Python 產生)
-        //const response = await fetch('./data.json');
-        const response = await fetch(process.env.PUBLIC_URL + "/data.json");
+        // 1. 取得基礎路徑 (GitHub Pages 上會是 /Smart-Stock-V2，本機是空字串)
+        const basePath = process.env.PUBLIC_URL || '';
+        
+        // 2. 加上時間戳 (?t=...) 防止瀏覽器快取舊資料
+        // 這樣您每天下午打開，保證都是看到最新的
+        const targetUrl = `${basePath}/data.json?t=${new Date().getTime()}`;
 
-        // 2. 如果讀取失敗 (例如檔案不存在)，就丟出錯誤，跳到 catch
-        if (!response.ok) throw new Error("Data file not found");
+        console.log("正在讀取資料路徑:", targetUrl);
 
-        // 3. 如果成功，將資料存入 stocks
+        const response = await fetch(targetUrl);
+
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
         const data = await response.json();
-        setStocks(data);
-        setDataSource("cloud"); // 標記為雲端數據
+        
+        // 簡單驗證資料是否為空
+        if (Array.isArray(data) && data.length > 0) {
+          setStocks(data);
+          setDataSource("cloud");
+          console.log("✅ 成功載入雲端數據:", data.length, "筆");
+        } else {
+          throw new Error("Data array is empty");
+        }
       } catch (error) {
-        // 4. 如果失敗，使用備用數據 (Fallback)
-        //console.log("尚無雲端資料，使用備用數據");
-        //setStocks(FALLBACK_STOCKS);
-        //setDataSource("fallback"); // 標記為備用數據
-        // 這行會把錯誤印在瀏覽器的控制台，方便我們找問題
-        console.error("抓取失敗，原因:", error);
-        console.log("尚無雲端資料，使用備用數據");
+        console.error("❌ 抓取失敗:", error);
+        console.log("使用備用數據顯示");
         setStocks(FALLBACK_STOCKS);
         setDataSource("fallback");
       } finally {
-        setLoading(false); // 讀取完成 (無論成功失敗)
+        setLoading(false);
       }
     };
     fetchData();
@@ -268,7 +272,6 @@ export default function App() {
             </span>
           </h1>
           <div className="flex items-center gap-2 text-sm mt-1 text-blue-200">
-            {/* 根據資料來源顯示不同的燈號 */}
             <span>
               {dataSource === "cloud"
                 ? "🟢 雲端數據連線正常 (最新)"
