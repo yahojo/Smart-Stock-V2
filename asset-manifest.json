@@ -1,10 +1,10 @@
 {
   "files": {
-    "main.js": "/Smart-Stock-V2/static/js/main.27ab1d25.js",
+    "main.js": "/Smart-Stock-V2/static/js/main.1f5dbb24.js",
     "index.html": "/Smart-Stock-V2/index.html",
-    "main.27ab1d25.js.map": "/Smart-Stock-V2/static/js/main.27ab1d25.js.map"
+    "main.1f5dbb24.js.map": "/Smart-Stock-V2/static/js/main.1f5dbb24.js.map"
   },
   "entrypoints": [
-    "static/js/main.27ab1d25.js"
+    "static/js/main.1f5dbb24.js"
   ]
 }
