@@ -120,10 +120,10 @@ for ticker in tickers:
         }
         
         results.append(stock_data)
-        print(f"✅ 已處理: {ticker}")
+        print(f"[OK] 已處理: {ticker}")
 
     except Exception as e:
-        print(f"❌ 錯誤 {ticker}: {e}")
+        print(f"[ERROR] 錯誤 {ticker}: {e}")
 
 # --- 輸出結果 ---
 os.makedirs('public', exist_ok=True)
@@ -133,4 +133,4 @@ with open(json_path, 'w', encoding='utf-8') as f:
     # 這裡加入 allow_nan=False 是雙保險，如果有漏網之魚會直接報錯提醒
     json.dump(results, f, ensure_ascii=False, indent=2, allow_nan=False)
 
-print(f"\n🎉 掃描完成！共產出 {len(results)} 筆資料。")
+print(f"\n[DONE] 掃描完成！共產出 {len(results)} 筆資料。")

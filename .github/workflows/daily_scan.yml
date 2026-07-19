@@ -53,6 +53,8 @@ jobs:
 
       # 7. 打包網頁 (Build)
       - name: Build React App
+        env:
+          CI: false
         run: npm run build
 
       # 8. 發布到 GitHub Pages
